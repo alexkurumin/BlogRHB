@@ -288,6 +288,14 @@
   .entry__excerpt p, .entry__full p{
     margin:0 0 14px;
     color:var(--ink);
+    overflow-wrap:anywhere;
+    word-break:break-word;
+  }
+  .entry__excerpt p a, .entry__full p a{
+    color:var(--blue);
+    text-decoration:underline;
+    overflow-wrap:anywhere;
+    word-break:break-all;
   }
   .entry__excerpt p:last-child, .entry__full p:last-child{margin-bottom:0;}
   .entry__full{ display:none; }
@@ -465,6 +473,18 @@
     });
   }
 
+  function linkify(escapedStr){
+    return escapedStr.replace(/(https?:\/\/[^\s<]+)/g, function(url){
+      var clean = url.replace(/[.,;:!?)]*$/, '');
+      var trailing = url.slice(clean.length);
+      return '<a href="' + clean + '" target="_blank" rel="noopener noreferrer">' + clean + '</a>' + trailing;
+    });
+  }
+
+  function textToHtml(str){
+    return linkify(escapeHtml(str));
+  }
+
   function renderPost(post, index){
     const wrap = document.createElement('article');
     wrap.className = 'entry';
@@ -490,7 +510,7 @@
     }
 
     const fullParas = paragraphs.map(function(p){
-      return '<p>' + escapeHtml(p) + '</p>';
+      return '<p>' + textToHtml(p) + '</p>';
     }).join('');
 
     wrap.innerHTML =
@@ -500,7 +520,7 @@
         '<h2 class="entry__title">' + escapeHtml(post.title) + '</h2>' +
         authorHtml +
         '<div class="entry__tags">' + tagsHtml + '</div>' +
-        '<div class="entry__excerpt"><p>' + escapeHtml(excerptText) + '</p></div>' +
+        '<div class="entry__excerpt"><p>' + textToHtml(excerptText) + '</p></div>' +
         '<div class="entry__full" id="' + fullId + '">' + fullParas + signatureHtml + '</div>' +
         (showToggle ? '<button class="entry__toggle" data-target="' + fullId + '">Ler texto completo <i class="fa-solid fa-chevron-down"></i></button>' : '') +
       '</div>';
