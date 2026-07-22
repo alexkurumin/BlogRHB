@@ -33,14 +33,12 @@
     margin:0;
     height:100vh;
     height:100dvh;
-    background:#dfe4ea;
+    background:var(--paper);
     color:var(--ink);
     font-family:'Inter',sans-serif;
     font-size:15.5px;
     line-height:1.6;
     -webkit-font-smoothing:antialiased;
-    display:flex;
-    justify-content:center;
   }
   h1,h2,h3,.serif{font-family:'Fraunces',serif; color:var(--navy); letter-spacing:-0.01em;}
   a{color:var(--blue);}
@@ -55,34 +53,26 @@
 
   /* =====================================================================
      APP SHELL
-     Fully fluid: fills the viewport edge-to-edge on any phone/tablet at
-     any orientation (no fixed heights, no device-detection breakpoints).
-     On screens wider than the app column (typically desktop, but also a
-     rotated phone/tablet), it simply centers as a card with a bit of
-     visual polish — the exact same markup, just more side margin.
+     Always fills the entire viewport, edge-to-edge, at any screen size or
+     orientation — no floating card, no rounded outer frame, no fixed
+     width/height. The top bar, category strip and bottom tab bar always
+     span the full width of the window (like a real app's chrome). Only
+     the text content inside gets a comfortable max reading width on very
+     wide screens, via the .content-max helper class.
      ===================================================================== */
   .app-shell{
     position:relative;
     width:100%;
-    max-width:480px;
+    height:100%;
     background:var(--paper);
     overflow:hidden;
-    box-shadow:0 0 0 1px rgba(0,0,0,0.04);
     display:flex;
     flex-direction:column;
   }
-  @media (min-width:501px){
-    body{
-      padding:28px 16px;
-      background:
-        radial-gradient(circle at 20% 20%, rgba(211,175,55,0.10), transparent 45%),
-        radial-gradient(circle at 80% 85%, rgba(73,110,154,0.14), transparent 50%),
-        #dfe4ea;
-    }
-    .app-shell{
-      border-radius:28px;
-      box-shadow:0 30px 60px -20px rgba(15,22,32,0.4), 0 0 0 1px rgba(168,159,144,0.35);
-    }
+  .content-max{
+    width:100%;
+    max-width:640px;
+    margin:0 auto;
   }
 
   /* ===================== TOP APP BAR ===================== */
@@ -388,7 +378,7 @@
 
   <!-- Feed -->
   <div class="feed-scroll" id="feedScroll">
-    <div id="timeline"></div>
+    <div id="timeline" class="content-max"></div>
     <div class="empty-state" id="emptyState" style="display:none;">
       <i class="fa-solid fa-inbox"></i>
       <p>Nenhuma publicação encontrada.</p>
@@ -408,7 +398,7 @@
     <div class="sheet">
       <div class="sheet__handle"></div>
       <div class="sheet__title">Filtrar por assunto</div>
-      <div class="sheet__list" id="catSheetList"></div>
+      <div class="sheet__list content-max" id="catSheetList"></div>
     </div>
   </div>
 
@@ -416,7 +406,7 @@
   <div class="sheet-overlay" id="aboutOverlay">
     <div class="sheet" style="max-height:80%;">
       <div class="sheet__handle"></div>
-      <div class="about-content">
+      <div class="about-content content-max">
         <h3>Diário do Robério</h3>
         <p style="color:#5b6774; font-size:0.88rem;">Um espaço para registrar o dia a dia, o que vai pelo coração e pela cabeça de um cidadão comum: pai, esposo, aposentado, corredor de rua e leitor assíduo. Assuntos diversos, sempre com fé, força e coragem.</p>
         <ul>
@@ -563,11 +553,13 @@
     const sigHtml = post.signature ? '<div class="detail__signature">' + escapeHtml(post.signature) + '</div>' : '';
     detailBarTitle.textContent = post.title;
     detailScroll.innerHTML =
+      '<div class="content-max">' +
       '<div class="detail__date"><i class="fa-regular fa-calendar"></i> ' + post.day + ' de ' + post.month_full + ' de ' + post.year + '</div>' +
       '<h1 class="detail__title">' + escapeHtml(post.title) + '</h1>' +
       authorHtml +
       '<div class="detail__tags">' + tagsHtml + '</div>' +
-      '<div class="detail__body">' + bodyHtml + sigHtml + '</div>';
+      '<div class="detail__body">' + bodyHtml + sigHtml + '</div>' +
+      '</div>';
     detailScroll.scrollTop = 0;
     detailEl.classList.add('open');
   }
