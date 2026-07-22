@@ -55,17 +55,32 @@
     max-width:480px;
     margin:0 auto;
     min-height:100vh;
+    min-height:100dvh;
     background:var(--paper);
     overflow:hidden;
     box-shadow:0 0 0 1px rgba(0,0,0,0.04);
     display:flex;
     flex-direction:column;
   }
-  @media (min-width:540px){
-    body{ padding:28px 0; display:flex; }
+  @media (min-width:540px) and (pointer:fine) and (hover:hover){
+    html,body{ height:auto; }
+    body{
+      min-height:100vh;
+      padding:40px 20px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(211,175,55,0.10), transparent 45%),
+        radial-gradient(circle at 80% 85%, rgba(73,110,154,0.14), transparent 50%),
+        #dfe4ea;
+    }
     .app-shell{
-      min-height:calc(100vh - 56px);
-      max-height:920px;
+      width:412px;
+      height:min(860px, calc(100vh - 80px));
+      min-height:0;
+      max-height:none;
+      flex:0 0 auto;
       border-radius:34px;
       box-shadow:0 30px 60px -20px rgba(15,22,32,0.45), 0 0 0 8px var(--navy-deep), 0 0 0 9px #000;
     }
