@@ -28,15 +28,19 @@
     --catbar-h:52px;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{height:100%;}
+  html{height:100%;}
   body{
     margin:0;
+    height:100vh;
+    height:100dvh;
     background:#dfe4ea;
     color:var(--ink);
     font-family:'Inter',sans-serif;
     font-size:15.5px;
     line-height:1.6;
     -webkit-font-smoothing:antialiased;
+    display:flex;
+    justify-content:center;
   }
   h1,h2,h3,.serif{font-family:'Fraunces',serif; color:var(--navy); letter-spacing:-0.01em;}
   a{color:var(--blue);}
@@ -49,49 +53,35 @@
     outline-offset:2px;
   }
 
-  /* ===================== APP SHELL (phone-like frame) ===================== */
+  /* =====================================================================
+     APP SHELL
+     Fully fluid: fills the viewport edge-to-edge on any phone/tablet at
+     any orientation (no fixed heights, no device-detection breakpoints).
+     On screens wider than the app column (typically desktop, but also a
+     rotated phone/tablet), it simply centers as a card with a bit of
+     visual polish — the exact same markup, just more side margin.
+     ===================================================================== */
   .app-shell{
     position:relative;
+    width:100%;
     max-width:480px;
-    margin:0 auto;
-    min-height:100vh;
-    min-height:100dvh;
     background:var(--paper);
     overflow:hidden;
     box-shadow:0 0 0 1px rgba(0,0,0,0.04);
     display:flex;
     flex-direction:column;
   }
-  @media (min-width:540px) and (pointer:fine) and (hover:hover){
-    html,body{ height:auto; }
+  @media (min-width:501px){
     body{
-      min-height:100vh;
-      padding:40px 20px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      padding:28px 16px;
       background:
         radial-gradient(circle at 20% 20%, rgba(211,175,55,0.10), transparent 45%),
         radial-gradient(circle at 80% 85%, rgba(73,110,154,0.14), transparent 50%),
         #dfe4ea;
     }
     .app-shell{
-      width:412px;
-      height:min(860px, calc(100vh - 80px));
-      min-height:0;
-      max-height:none;
-      flex:0 0 auto;
-      border-radius:34px;
-      box-shadow:0 30px 60px -20px rgba(15,22,32,0.45), 0 0 0 8px var(--navy-deep), 0 0 0 9px #000;
-    }
-    .app-shell::before{
-      content:"";
-      position:absolute;
-      top:10px; left:50%; transform:translateX(-50%);
-      width:120px; height:22px;
-      background:#000;
-      border-radius:0 0 16px 16px;
-      z-index:50;
+      border-radius:28px;
+      box-shadow:0 30px 60px -20px rgba(15,22,32,0.4), 0 0 0 1px rgba(168,159,144,0.35);
     }
   }
 
