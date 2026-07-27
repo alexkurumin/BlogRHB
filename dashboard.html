@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel · Diário do Robério</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  :root{
+    --navy:#2b3a4d;
+    --navy-deep:#1f2a37;
+    --blue:#496e9a;
+    --blue-soft:#6c8bad;
+    --gold:#d3af37;
+    --gold-soft:#e7cd7a;
+    --cream:#e2d0c6;
+    --cream-soft:#f4ece5;
+    --taupe:#a89f90;
+    --paper:#faf8f5;
+    --ink:#26313f;
+    --ok:#3f8a5c;
+    --warn:#b6532c;
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-size:15.5px;
+    line-height:1.6;
+  }
+  h1,h2,h3,.serif{font-family:'Fraunces',serif; color:var(--navy); letter-spacing:-0.01em;}
+  a{color:var(--blue);}
+  button{font-family:inherit;}
+
+  .topbar{
+    background:linear-gradient(120deg, var(--navy) 0%, var(--navy-deep) 100%);
+    color:#fff;
+    padding:18px 20px;
+    display:flex; align-items:center; gap:12px;
+  }
+  .topbar__logo{
+    width:34px; height:34px; border-radius:10px;
+    background:rgba(211,175,55,0.16);
+    border:1px solid rgba(211,175,55,0.5);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--gold-soft);
+  }
+  .topbar__title{font-family:'Fraunces',serif; font-size:1.15rem; font-weight:600;}
+  .topbar__title small{display:block; font-family:'Inter',sans-serif; font-size:0.7rem; font-weight:500; color:var(--cream); opacity:0.8; text-transform:uppercase; letter-spacing:0.06em;}
+  .topbar__badge{
+    margin-left:auto; font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em;
+    background:rgba(255,255,255,0.1); padding:5px 10px; border-radius:100px; color:var(--gold-soft);
+  }
+
+  .wrap{ max-width:760px; margin:0 auto; padding:22px 18px 60px; }
+  .card{
+    background:#fff;
+    border:1px solid rgba(168,159,144,0.25);
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:18px;
+    box-shadow:0 4px 16px -10px rgba(43,58,77,0.2);
+  }
+  .card h2{ font-size:1.05rem; margin:0 0 4px; display:flex; align-items:center; gap:8px;}
+  .card h2 i{ color:var(--blue); }
+  .card__hint{ font-size:0.85rem; color:#5b6774; margin:0 0 16px; }
+
+  /* upload */
+  .dropzone{
+    border:2px dashed var(--cream);
+    border-radius:12px;
+    padding:26px 16px;
+    text-align:center;
+    background:var(--cream-soft);
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .dropzone:hover, .dropzone.drag{ border-color:var(--blue-soft); background:#fff; }
+  .dropzone i{ font-size:1.6rem; color:var(--blue); margin-bottom:8px; display:block; }
+  .dropzone strong{ color:var(--navy); }
+  #fileInput{ display:none; }
+  .file-status{
+    display:none;
+    margin-top:12px;
+    padding:10px 14px;
+    border-radius:10px;
+    font-size:0.85rem;
+    align-items:center;
+    gap:8px;
+  }
+  .file-status.ok{ display:flex; background:#eaf5ee; color:var(--ok); }
+  .file-status.err{ display:flex; background:#fbeae3; color:var(--warn); }
+
+  /* stats */
+  .stat-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:18px; }
+  .stat-box{ background:var(--cream-soft); border-radius:12px; padding:14px 10px; text-align:center; }
+  .stat-box .num{ font-family:'Fraunces',serif; font-size:1.5rem; color:var(--navy); font-weight:700; display:block; }
+  .stat-box .lbl{ font-size:0.68rem; color:#6b7784; text-transform:uppercase; letter-spacing:0.04em; }
+
+  .bar-row{ display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:0.85rem; }
+  .bar-row .bar-label{ width:110px; flex:0 0 auto; display:flex; align-items:center; gap:6px; color:var(--navy); font-weight:600; }
+  .bar-row .bar-track{ flex:1; background:var(--cream-soft); border-radius:100px; height:10px; overflow:hidden; }
+  .bar-row .bar-fill{ height:100%; background:linear-gradient(90deg, var(--blue), var(--gold)); border-radius:100px; }
+  .bar-row .bar-count{ width:28px; flex:0 0 auto; text-align:right; color:#6b7784; font-weight:600; }
+
+  .visits-box{
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    background:var(--cream-soft); border-radius:12px; padding:14px;
+  }
+  .visits-box img{ height:26px; }
+  .visits-note{ font-size:0.78rem; color:#6b7784; margin-top:10px; }
+
+  /* form */
+  label{ display:block; font-size:0.83rem; font-weight:600; color:var(--navy); margin:14px 0 6px; }
+  label:first-of-type{ margin-top:0; }
+  input[type="text"], input[type="date"], textarea{
+    width:100%; border:1px solid var(--cream); border-radius:10px;
+    padding:10px 12px; font-family:inherit; font-size:0.92rem; color:var(--ink);
+    background:#fff;
+  }
+  input:focus, textarea:focus{ outline:2px solid var(--gold); outline-offset:1px; }
+  textarea{ min-height:160px; resize:vertical; line-height:1.55; }
+  .field-hint{ font-size:0.78rem; color:#8a94a0; margin-top:4px; }
+
+  .tag-check-grid{ display:flex; flex-wrap:wrap; gap:8px; }
+  .tag-check{
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--cream-soft); border:1px solid var(--cream);
+    padding:7px 12px; border-radius:100px; font-size:0.82rem; font-weight:600; color:var(--navy);
+    cursor:pointer; user-select:none;
+  }
+  .tag-check input{ accent-color:var(--blue); }
+  .tag-check.checked{ background:var(--navy); color:#fff; border-color:var(--navy); }
+
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--navy); color:#fff; border:none;
+    padding:12px 20px; border-radius:100px; font-weight:700; font-size:0.9rem;
+    cursor:pointer; margin-top:18px;
+  }
+  .btn:hover{ background:var(--navy-deep); }
+  .btn:disabled{ background:var(--taupe); cursor:not-allowed; }
+  .btn--gold{ background:var(--gold); color:var(--navy); }
+  .btn--gold:hover{ background:var(--gold-soft); }
+
+  .preview-card{
+    display:none;
+    margin-top:16px;
+    border:1px solid rgba(168,159,144,0.3);
+    border-radius:12px;
+    padding:14px;
+    background:var(--cream-soft);
+  }
+  .preview-card.show{ display:block; }
+  .preview-card .p-date{ font-size:0.75rem; color:var(--blue); font-weight:700; margin-bottom:4px; }
+  .preview-card .p-title{ font-family:'Fraunces',serif; font-size:1.05rem; color:var(--navy); margin:0 0 6px; }
+  .preview-card .p-tags{ display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;}
+  .preview-card .p-tags span{ font-size:0.68rem; font-weight:700; color:var(--blue); background:#fff; padding:2px 9px; border-radius:100px; }
+
+  .disabled-note{ font-size:0.85rem; color:var(--taupe); font-style:italic; }
+  .success-banner{
+    display:none; align-items:center; gap:10px;
+    background:#eaf5ee; color:var(--ok); border-radius:10px; padding:12px 14px; font-size:0.88rem; margin-top:14px;
+  }
+  .success-banner.show{ display:flex; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar__logo"><i class="fa-solid fa-gauge-high"></i></div>
+  <div class="topbar__title">Painel do Robério<small>Diário do Robério</small></div>
+  <div class="topbar__badge"><i class="fa-solid fa-lock"></i> privado</div>
+</div>
+
+<div class="wrap">
+
+  <div class="card">
+    <h2><i class="fa-solid fa-upload"></i> 1. Carregue o blog atual</h2>
+    <p class="card__hint">Selecione o arquivo <code>index.html</code> que está publicado no seu site agora. O painel lê as publicações que já existem nele — nenhum dado sai do seu navegador.</p>
+    <div class="dropzone" id="dropzone">
+      <i class="fa-solid fa-file-arrow-up"></i>
+      <strong>Clique para escolher o arquivo</strong><br>
+      <span style="font-size:0.82rem; color:#6b7784;">ou arraste o index.html aqui</span>
+    </div>
+    <input type="file" id="fileInput" accept=".html">
+    <div class="file-status" id="fileStatus"></div>
+  </div>
+
+  <div class="card" id="statsCard" style="display:none;">
+    <h2><i class="fa-solid fa-chart-simple"></i> Estatísticas</h2>
+    <div class="stat-grid">
+      <div class="stat-box"><span class="num" id="statTotal">0</span><span class="lbl">Publicações</span></div>
+      <div class="stat-box"><span class="num" id="statMonths">0</span><span class="lbl">Meses ativos</span></div>
+      <div class="stat-box"><span class="num" id="statLast">–</span><span class="lbl">Mais recente</span></div>
+    </div>
+    <div id="tagBars"></div>
+  </div>
+
+  <div class="card" id="monthCard" style="display:none;">
+    <h2><i class="fa-solid fa-calendar-days"></i> Publicações por mês (últimos 12)</h2>
+    <div id="monthBars"></div>
+  </div>
+
+  <div class="card">
+    <h2><i class="fa-solid fa-eye"></i> Acessos ao blog</h2>
+    <p class="card__hint">Contador público e gratuito, sem necessidade de cadastro — o mesmo número que aparece no topo do blog.</p>
+    <div class="visits-box">
+      <img src="https://api.visitorbadge.io/api/visitors?path=DiarioDoRoberio-RHB&label=Visitas%20ao%20blog&labelColor=%232b3a4d&countColor=%23d3af37&style=flat-square" alt="Contador de visitas">
+      <a href="https://visitorbadge.io/status?path=DiarioDoRoberio-RHB" target="_blank" rel="noopener" style="font-size:0.85rem; font-weight:600;">Ver histórico (2 dias) <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:0.7em;"></i></a>
+    </div>
+    <p class="visits-note">Como é um serviço gratuito sem login, ele não separa por país ou IP — só o total de acessos. E, já que não existe uma forma de "só consultar" sem contar, abrir este painel também soma 1 acesso ao contador.</p>
+  </div>
+
+  <div class="card">
+    <h2><i class="fa-solid fa-feather-pointed"></i> 2. Nova postagem</h2>
+    <p class="card__hint" id="formHint">Carregue o index.html acima para liberar o formulário.</p>
+
+    <form id="postForm" style="opacity:0.4; pointer-events:none;">
+      <label for="fieldDate">Data da postagem</label>
+      <input type="date" id="fieldDate" required>
+
+      <label for="fieldTitle">Título</label>
+      <input type="text" id="fieldTitle" placeholder='Ex.: Bom dia, ou um título curto' required>
+
+      <label for="fieldText">Texto</label>
+      <textarea id="fieldText" placeholder="Escreva o texto aqui. Separe os parágrafos deixando uma linha em branco entre eles." required></textarea>
+      <div class="field-hint">Deixe uma linha vazia entre parágrafos.</div>
+
+      <label for="fieldSignature">Assinatura (opcional)</label>
+      <input type="text" id="fieldSignature" value="Fé, força e coragem... Sempre!">
+
+      <label>Categorias</label>
+      <div class="tag-check-grid" id="tagCheckGrid"></div>
+
+      <button type="submit" class="btn"><i class="fa-solid fa-plus"></i> Adicionar à lista</button>
+    </form>
+
+    <div class="preview-card" id="previewCard">
+      <div class="p-date" id="previewDate"></div>
+      <h3 class="p-title" id="previewTitle"></h3>
+      <div class="p-tags" id="previewTags"></div>
+    </div>
+
+    <div class="success-banner" id="addedBanner"><i class="fa-solid fa-circle-check"></i> Postagem adicionada à lista. Você pode adicionar outra, ou já gerar o arquivo abaixo.</div>
+  </div>
+
+  <div class="card">
+    <h2><i class="fa-solid fa-download"></i> 3. Gerar arquivo atualizado</h2>
+    <p class="card__hint" id="downloadHint">Adicione ao menos uma postagem nova para liberar o download.</p>
+    <button class="btn btn--gold" id="downloadBtn" disabled><i class="fa-solid fa-file-arrow-down"></i> Baixar index.html atualizado</button>
+    <p class="visits-note">Depois de baixar, substitua o <code>index.html</code> no seu repositório do GitHub pelo arquivo novo.</p>
+  </div>
+
+</div>
+
+<script>
+  const TAG_META = [
+    {name:'Política', icon:'fa-landmark'},
+    {name:'Sociedade', icon:'fa-people-group'},
+    {name:'Família', icon:'fa-house-chimney'},
+    {name:'Saúde', icon:'fa-heart-pulse'},
+    {name:'Esportes', icon:'fa-futbol'},
+    {name:'Fé', icon:'fa-dove'},
+    {name:'Cotidiano', icon:'fa-mug-hot'},
+    {name:'Diversos', icon:'fa-shapes'},
+  ];
+  const MONTH_ABBR = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const MONTH_FULL = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+  let rawHtml = null;
+  let posts = null;
+  let pendingNewPosts = [];
+
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+  const fileStatus = document.getElementById('fileStatus');
+
+  dropzone.addEventListener('click', () => fileInput.click());
+  dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('drag');
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length) handleFile(e.target.files[0]);
+  });
+
+  function handleFile(file){
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target.result;
+      const m = text.match(/const POSTS = (\[[\s\S]*?\]);\n/);
+      if (!m) {
+        showFileStatus(false, 'Não encontrei a lista de publicações nesse arquivo. Confirme que é o index.html do blog.');
+        return;
+      }
+      try {
+        posts = JSON.parse(m[1]);
+      } catch (err) {
+        showFileStatus(false, 'O arquivo foi lido, mas os dados das publicações vieram corrompidos.');
+        return;
+      }
+      rawHtml = text;
+      showFileStatus(true, `Arquivo carregado: ${posts.length} publicações encontradas.`);
+      enableForm();
+      renderStats();
+    };
+    reader.onerror = () => showFileStatus(false, 'Não consegui ler esse arquivo.');
+    reader.readAsText(file, 'utf-8');
+  }
+
+  function showFileStatus(ok, msg){
+    fileStatus.className = 'file-status ' + (ok ? 'ok' : 'err');
+    fileStatus.innerHTML = '<i class="fa-solid ' + (ok ? 'fa-circle-check' : 'fa-circle-exclamation') + '"></i> ' + msg;
+  }
+
+  function enableForm(){
+    document.getElementById('postForm').style.opacity = '1';
+    document.getElementById('postForm').style.pointerEvents = 'auto';
+    document.getElementById('formHint').textContent = 'Preencha os campos abaixo para escrever uma nova publicação.';
+  }
+
+  /* ---------- Stats ---------- */
+  function renderStats(){
+    document.getElementById('statsCard').style.display = 'block';
+    document.getElementById('monthCard').style.display = 'block';
+
+    document.getElementById('statTotal').textContent = posts.length;
+
+    const tagCounts = {};
+    const monthSet = new Set();
+    const monthCounts = {};
+    posts.forEach(p => {
+      (p.tags || []).forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; });
+      const key = p.year + '-' + String(p.month).padStart(2, '0');
+      monthSet.add(key);
+      monthCounts[key] = (monthCounts[key] || 0) + 1;
+    });
+    document.getElementById('statMonths').textContent = monthSet.size;
+
+    const sorted = [...posts].sort((a, b) => (b.year - a.year) || (b.month - a.month) || (b.day - a.day));
+    const last = sorted[0];
+    document.getElementById('statLast').textContent = last ? (last.day + ' ' + last.month_abbr) : '–';
+
+    const maxTag = Math.max(1, ...Object.values(tagCounts));
+    const tagBarsEl = document.getElementById('tagBars');
+    tagBarsEl.innerHTML = TAG_META
+      .filter(t => tagCounts[t.name])
+      .map(t => {
+        const count = tagCounts[t.name];
+        const pct = Math.round((count / maxTag) * 100);
+        return '<div class="bar-row">' +
+          '<div class="bar-label"><i class="fa-solid ' + t.icon + '"></i> ' + t.name + '</div>' +
+          '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%"></div></div>' +
+          '<div class="bar-count">' + count + '</div>' +
+        '</div>';
+      }).join('');
+
+    const monthKeys = Object.keys(monthCounts).sort().slice(-12);
+    const maxMonth = Math.max(1, ...monthKeys.map(k => monthCounts[k]));
+    const monthBarsEl = document.getElementById('monthBars');
+    monthBarsEl.innerHTML = monthKeys.map(key => {
+      const [y, m] = key.split('-').map(Number);
+      const count = monthCounts[key];
+      const pct = Math.round((count / maxMonth) * 100);
+      return '<div class="bar-row">' +
+        '<div class="bar-label">' + MONTH_ABBR[m] + '/' + y + '</div>' +
+        '<div class="bar-track"><div class="bar-fill" style="width:' + pct + '%"></div></div>' +
+        '<div class="bar-count">' + count + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  /* ---------- Tag checkboxes ---------- */
+  const tagCheckGrid = document.getElementById('tagCheckGrid');
+  tagCheckGrid.innerHTML = TAG_META.map((t, i) =>
+    '<label class="tag-check" data-idx="' + i + '"><input type="checkbox" value="' + t.name + '"><i class="fa-solid ' + t.icon + '"></i> ' + t.name + '</label>'
+  ).join('');
+  tagCheckGrid.addEventListener('change', (e) => {
+    const label = e.target.closest('.tag-check');
+    if (label) label.classList.toggle('checked', e.target.checked);
+  });
+
+  /* ---------- Form submit: add post to in-memory list ---------- */
+  function escapeHtml(str){
+    return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  document.getElementById('postForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const dateVal = document.getElementById('fieldDate').value;
+    const title = document.getElementById('fieldTitle').value.trim();
+    const textVal = document.getElementById('fieldText').value.trim();
+    const signature = document.getElementById('fieldSignature').value.trim();
+    const checked = [...tagCheckGrid.querySelectorAll('input:checked')].map(i => i.value);
+
+    if (!dateVal || !title || !textVal) {
+      alert('Preencha a data, o título e o texto antes de adicionar.');
+      return;
+    }
+
+    const [y, m, d] = dateVal.split('-').map(Number);
+    const paragraphs = textVal.split(/\n\s*\n/).map(p => p.trim().replace(/\n/g, ' ')).filter(Boolean);
+
+    const newPost = {
+      day: d,
+      month: m,
+      year: y,
+      month_abbr: MONTH_ABBR[m],
+      month_full: MONTH_FULL[m],
+      title: title,
+      author: null,
+      paragraphs: paragraphs,
+      signature: signature || null,
+      tags: checked.length ? checked : ['Diversos'],
+    };
+
+    posts.push(newPost);
+    posts.sort((a, b) => (b.year - a.year) || (b.month - a.month) || (b.day - a.day));
+    pendingNewPosts.push(newPost);
+
+    // preview
+    document.getElementById('previewDate').textContent = d + ' de ' + MONTH_FULL[m] + ' de ' + y;
+    document.getElementById('previewTitle').textContent = title;
+    document.getElementById('previewTags').innerHTML = newPost.tags.map(t => '<span>' + escapeHtml(t) + '</span>').join('');
+    document.getElementById('previewCard').classList.add('show');
+    document.getElementById('addedBanner').classList.add('show');
+
+    // reset form fields (keep signature default)
+    document.getElementById('fieldDate').value = '';
+    document.getElementById('fieldTitle').value = '';
+    document.getElementById('fieldText').value = '';
+    tagCheckGrid.querySelectorAll('input:checked').forEach(i => { i.checked = false; i.closest('.tag-check').classList.remove('checked'); });
+
+    renderStats();
+
+    document.getElementById('downloadBtn').disabled = false;
+    document.getElementById('downloadHint').textContent = pendingNewPosts.length + ' postagem(ns) nova(s) pronta(s) para gerar o arquivo.';
+  });
+
+  /* ---------- Generate & download updated index.html ---------- */
+  document.getElementById('downloadBtn').addEventListener('click', function(){
+    if (!rawHtml || !posts) return;
+
+    const TAG_ORDER = TAG_META.map(t => t.name);
+    const tagCounts = {};
+    posts.forEach(p => (p.tags || []).forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; }));
+    const tagsData = TAG_ORDER.filter(t => tagCounts[t]).map(t => ({
+      name: t,
+      icon: TAG_META.find(m2 => m2.name === t).icon,
+      count: tagCounts[t],
+    }));
+
+    const postsJson = JSON.stringify(posts).replace(/<\//g, '<\\/');
+    const tagsJson = JSON.stringify(tagsData);
+
+    let updated = rawHtml.replace(/const POSTS = \[[\s\S]*?\];\n/, 'const POSTS = ' + postsJson + ';\n');
+    updated = updated.replace(/const TAGS = \[[\s\S]*?\];/, 'const TAGS = ' + tagsJson + ';');
+    updated = updated.replace(/\d+ publicações desde/, posts.length + ' publicações desde');
+
+    const blob = new Blob([updated], {type: 'text/html'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'index.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+</script>
+</body>
+</html>
