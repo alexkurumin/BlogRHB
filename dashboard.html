@@ -170,17 +170,92 @@
     background:#eaf5ee; color:var(--ok); border-radius:10px; padding:12px 14px; font-size:0.88rem; margin-top:14px;
   }
   .success-banner.show{ display:flex; }
+
+  /* ===================== LOGIN GATE ===================== */
+  .gate-screen{
+    min-height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    padding:24px;
+  }
+  .gate-card{
+    width:100%; max-width:340px;
+    background:#fff;
+    border-radius:20px;
+    padding:28px 24px 24px;
+    text-align:center;
+    box-shadow:0 30px 60px -20px rgba(15,22,32,0.35);
+  }
+  .gate-card__icon{
+    width:52px; height:52px; border-radius:50%;
+    background:var(--cream-soft);
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 14px;
+    color:var(--gold);
+    font-size:1.3rem;
+  }
+  .gate-card h1{ font-size:1.15rem; margin:0 0 4px; }
+  .gate-card p{ font-size:0.85rem; color:#5b6774; margin:0 0 18px; }
+  .gate-card input[type="password"]{
+    width:100%; border:1px solid var(--cream); border-radius:10px;
+    padding:11px 14px; font-family:inherit; font-size:0.95rem; text-align:center;
+    margin-bottom:12px;
+  }
+  .gate-card input:focus{ outline:2px solid var(--gold); outline-offset:1px; }
+  .gate-error{
+    display:none; font-size:0.8rem; color:var(--warn); margin:-4px 0 12px;
+  }
+  .gate-error.show{ display:block; }
+  .gate-card .btn{ width:100%; margin-top:0; justify-content:center; }
+
+  /* change password */
+  .pw-toggle{
+    background:none; border:none; color:var(--taupe); font-size:0.75rem;
+    display:inline-flex; align-items:center; gap:5px; cursor:pointer; margin-left:auto;
+  }
+  .pw-form{ display:none; margin-top:14px; text-align:left; }
+  .pw-form.show{ display:block; }
+  .pw-form label{ margin-top:10px; }
+  .pw-form label:first-child{ margin-top:0; }
 </style>
 </head>
 <body>
 
+<!-- Login gate -->
+<div class="gate-screen" id="gateScreen">
+  <div class="gate-card">
+    <div class="gate-card__icon"><i class="fa-solid fa-lock"></i></div>
+    <h1>Painel do Robério</h1>
+    <p>Digite a senha para acessar.</p>
+    <input type="password" id="gatePasswordInput" placeholder="Senha" autocomplete="current-password">
+    <div class="gate-error" id="gateError">Senha incorreta. Tente novamente.</div>
+    <button class="btn" id="gateEnterBtn" style="width:100%; justify-content:center;"><i class="fa-solid fa-right-to-bracket"></i> Entrar</button>
+  </div>
+</div>
+
+<div id="dashboardApp" style="display:none;">
+
 <div class="topbar">
   <div class="topbar__logo"><i class="fa-solid fa-gauge-high"></i></div>
   <div class="topbar__title">Painel do Robério<small>Diário do Robério</small></div>
-  <div class="topbar__badge"><i class="fa-solid fa-lock"></i> privado</div>
+  <button class="pw-toggle" id="pwToggleBtn"><i class="fa-solid fa-key"></i> trocar senha</button>
 </div>
 
 <div class="wrap">
+
+  <div class="card" id="pwCard" style="display:none;">
+    <h2><i class="fa-solid fa-key"></i> Trocar senha</h2>
+    <div class="pw-form show">
+      <label for="pwCurrent">Senha atual</label>
+      <input type="password" id="pwCurrent" autocomplete="current-password">
+      <label for="pwNew">Nova senha</label>
+      <input type="password" id="pwNew" autocomplete="new-password">
+      <label for="pwConfirm">Confirmar nova senha</label>
+      <input type="password" id="pwConfirm" autocomplete="new-password">
+      <div class="gate-error" id="pwError"></div>
+      <div class="success-banner" id="pwSuccess"><i class="fa-solid fa-circle-check"></i> Senha alterada com sucesso.</div>
+      <button class="btn" id="pwSaveBtn"><i class="fa-solid fa-check"></i> Salvar nova senha</button>
+    </div>
+  </div>
 
   <div class="card">
     <h2><i class="fa-solid fa-upload"></i> 1. Carregue o blog atual</h2>
@@ -261,7 +336,100 @@
 
 </div>
 
+</div>
+
 <script>
+  /* ================= Login gate ================= */
+  const DEFAULT_PW_HASH = '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'; // sha256("admin123")
+  const PW_HASH_KEY = 'painelRoberio_pwHash';
+  const AUTH_SESSION_KEY = 'painelRoberio_authed';
+
+  async function sha256Hex(text){
+    const enc = new TextEncoder().encode(text);
+    const digest = await crypto.subtle.digest('SHA-256', enc);
+    return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function getStoredHash(){
+    try{ return localStorage.getItem(PW_HASH_KEY) || DEFAULT_PW_HASH; }
+    catch(e){ return DEFAULT_PW_HASH; }
+  }
+
+  const gateScreen = document.getElementById('gateScreen');
+  const dashboardApp = document.getElementById('dashboardApp');
+  const gatePasswordInput = document.getElementById('gatePasswordInput');
+  const gateError = document.getElementById('gateError');
+  const gateEnterBtn = document.getElementById('gateEnterBtn');
+
+  function unlockDashboard(){
+    gateScreen.style.display = 'none';
+    dashboardApp.style.display = 'block';
+    try{ sessionStorage.setItem(AUTH_SESSION_KEY, '1'); }catch(e){}
+  }
+
+  async function attemptLogin(){
+    const entered = gatePasswordInput.value;
+    const enteredHash = await sha256Hex(entered);
+    if(enteredHash === getStoredHash()){
+      gateError.classList.remove('show');
+      unlockDashboard();
+    } else {
+      gateError.classList.add('show');
+      gatePasswordInput.value = '';
+      gatePasswordInput.focus();
+    }
+  }
+
+  gateEnterBtn.addEventListener('click', attemptLogin);
+  gatePasswordInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') attemptLogin(); });
+
+  // skip the gate if already unlocked earlier in this same browser tab session
+  try{
+    if(sessionStorage.getItem(AUTH_SESSION_KEY) === '1') unlockDashboard();
+  }catch(e){}
+
+  /* ================= Change password ================= */
+  const pwToggleBtn = document.getElementById('pwToggleBtn');
+  const pwCard = document.getElementById('pwCard');
+  pwToggleBtn.addEventListener('click', () => {
+    pwCard.style.display = (pwCard.style.display === 'none') ? 'block' : 'none';
+    if(pwCard.style.display === 'block') pwCard.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  document.getElementById('pwSaveBtn').addEventListener('click', async () => {
+    const current = document.getElementById('pwCurrent').value;
+    const newPw = document.getElementById('pwNew').value;
+    const confirmPw = document.getElementById('pwConfirm').value;
+    const pwError = document.getElementById('pwError');
+    const pwSuccess = document.getElementById('pwSuccess');
+    pwError.classList.remove('show');
+    pwSuccess.classList.remove('show');
+
+    const currentHash = await sha256Hex(current);
+    if(currentHash !== getStoredHash()){
+      pwError.textContent = 'A senha atual está incorreta.';
+      pwError.classList.add('show');
+      return;
+    }
+    if(newPw.length < 4){
+      pwError.textContent = 'A nova senha precisa ter ao menos 4 caracteres.';
+      pwError.classList.add('show');
+      return;
+    }
+    if(newPw !== confirmPw){
+      pwError.textContent = 'A confirmação não coincide com a nova senha.';
+      pwError.classList.add('show');
+      return;
+    }
+    const newHash = await sha256Hex(newPw);
+    try{ localStorage.setItem(PW_HASH_KEY, newHash); }catch(e){}
+    pwSuccess.classList.add('show');
+    document.getElementById('pwCurrent').value = '';
+    document.getElementById('pwNew').value = '';
+    document.getElementById('pwConfirm').value = '';
+  });
+
+
   const TAG_META = [
     {name:'Política', icon:'fa-landmark'},
     {name:'Sociedade', icon:'fa-people-group'},
